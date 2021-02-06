@@ -1,3 +1,8 @@
+/bazel-*
+.env
+.vscode
+*.DS_Store
+
 # Prerequisites
 *.d
 
@@ -30,3 +35,4 @@
 *.exe
 *.out
 *.app
+*.env
