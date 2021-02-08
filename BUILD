@@ -1,7 +1,7 @@
 cc_binary(
     name = "simulate_day",
-    srcs = ["traderjoe/client_utils/client.h", "traderjoe/client_utils/client.cpp", "traderjoe/sim/simulate_day.cpp"],
-    includes = ["traderjoe/client_utils/client.h"],
+    srcs = ["traderjoe/client_utils/client.h", "traderjoe/client_utils/client.cpp", "traderjoe/sim/simulate_day.cpp", "traderjoe/strategy/base_strategy.h", "traderjoe/strategy/base_strategy.cpp"],
+    includes = ["traderjoe/client_utils/client.h", "traderjoe/strategy/base_strategy.h"],
     deps = [
         "@com_github_marpaia_alpaca_trade_api_cpp//alpaca:alpaca",
     ],

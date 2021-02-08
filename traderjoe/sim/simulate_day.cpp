@@ -1,19 +1,21 @@
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 #include "alpaca/alpaca.h"
 #include "gflags/gflags.h"
 #include "glog/logging.h"
 #include "traderjoe/client_utils/client.h"
+#include "traderjoe/strategy/base_strategy.h"
 
 using namespace std;
 
 /*
 Design:
--   Provide a starting timestamp, "current_time"
--   Iterate a whole day one step at a time (minute?)
--   When pulling stats like bars, use this changing "current_time" timestamp
--   Keep track of net gain/loss from day
+    -   Provide a starting timestamp, "current_time"
+    -   Iterate a whole day one step at a time (minute?)
+    -   When pulling stats like bars, use this changing "current_time" timestamp
+    -   Keep track of net gain/loss from day
 */
 
 int main(int argc, char* argv[]) 
@@ -23,6 +25,8 @@ int main(int argc, char* argv[])
 
     FLAGS_logtostderr = 1;
     FLAGS_minloglevel = 2;    
+
+    auto ticker = "AAPL";
 
     if (argc < 2)
         throw "Expected input arg: {StartTimestamp}, e.g. -- 2020-04-03T09:30:00-08:00";
@@ -59,7 +63,7 @@ int main(int argc, char* argv[])
             puts(end_buffer);
 
         auto bars_response = client.getBars(
-            {"AAPL"}, 
+            {ticker}, 
             start_buffer,
             end_buffer,
             "",
@@ -83,7 +87,21 @@ int main(int argc, char* argv[])
         auto start_price = bars.front().open_price;
         auto end_price = bars.back().close_price;
         auto percent_change = (end_price - start_price) / start_price * 100;
-        std::cout << "AAPL moved " << percent_change << "% over the time range." << start_price << " " << end_price << " " << bars.back().time << std::endl;
+        cout << "AAPL moved " << percent_change << "% over the time range." << start_price << " " << end_price << " " << bars.back().time << std::endl;
+
+        Strategy::StrategyInput si(
+            bars.front().open_price, 
+            bars.back().close_price, 
+            min(bars.front().low_price, bars.back().low_price),
+            max(bars.front().high_price, bars.back().high_price),
+            bars.front().volume,
+            bars.back().volume,
+            ticker
+        );
+        
+        int shares_to_buy = Strategy::BaseStrategy::SharesToBuy({si});
+
+        cout << "Strategy suggests to buy " << shares_to_buy << " shares" << endl;
     }
 
     return 0;
